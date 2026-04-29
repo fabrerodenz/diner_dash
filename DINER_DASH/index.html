@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DINER DASH! - EFL Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --white: #FFFFFF;
+            --text: #2D3436;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Fredoka', sans-serif;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+        }
+
+        #home-screen { 
+            display: flex; 
+            background-image: url('home_page.png'); 
+            background-color: #a29bfe; 
+            justify-content: flex-end; 
+            padding-bottom: 10%; 
+        }
+
+        #game-screen { background-image: url('game.png'); background-color: #fab1a0; }
+        #result-screen { background-image: url('result_page.png'); background-color: #55efc4; }
+
+        .btn {
+            background: var(--accent);
+            border: none;
+            padding: 25px 60px;
+            border-radius: 50px;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            box-shadow: 0 10px 0 #e1c01e;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: translateY(5px); box-shadow: 0 5px 0 #e1c01e; }
+
+        /* HUD */
+        .hud {
+            position: absolute;
+            top: 20px;
+            width: 95%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 10px 30px;
+            border-radius: 35px;
+            font-size: 2rem;
+            font-weight: 600;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        #timer-box {
+            background: var(--primary);
+            color: white;
+            font-size: 2.8rem;
+            padding: 15px 45px;
+            border: 6px solid white;
+            border-radius: 60px;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+            transform: rotate(-2deg);
+        }
+
+        /* CHEF: 500px height, bottom: 0, right: -30 */
+        .chef-container {
+            position: absolute;
+            bottom: 0px;
+            right: -30px;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        .chef-img {
+            height: 500px; 
+            filter: drop-shadow(-15px 5px 20px rgba(0,0,0,0.2));
+            display: block;
+        }
+
+        /* CUSTOMER AREA */
+        .customer-wrapper {
+            position: relative;
+            height: 380px; 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; 
+            margin-bottom: 20px; 
+        }
+
+        .customer-img {
+            height: 350px; 
+            position: absolute;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(120vw);
+            z-index: 40;
+        }
+
+        .customer-img.at-center { transform: translateX(0); }
+        .customer-img.exit-left { transform: translateX(-120vw); }
+
+        /* BUBBLE MODIFICATION: top: -150px */
+        .speech-bubble {
+            background: white;
+            padding: 20px 45px;
+            border-radius: 60px;
+            font-size: 2.6rem;
+            font-weight: 600;
+            position: absolute;
+            top: -150px; 
+            box-shadow: 0 15px 35px var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 50;
+            text-align: center;
+            border: 6px solid var(--secondary);
+            min-width: 300px;
+        }
+
+        .speech-bubble.visible { opacity: 1; }
+
+        /* OPTIONS AREA */
+        .choice-area {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            padding-right: 15%; 
+            z-index: 45;
+        }
+
+        .card {
+            background: white;
+            width: 160px; 
+            height: 160px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 0 #ddd;
+            cursor: pointer;
+            transition: transform 0.1s;
+            flex-shrink: 0;
+        }
+
+        .card:active { transform: scale(0.9); }
+        .card img { width: 120px; height: 120px; object-fit: contain; }
+        .card.selected { background: var(--secondary); box-shadow: 0 12px 0 #39a69e; }
+
+        .controls { position: absolute; bottom: 20px; left: 20px; display: flex; gap: 15px; }
+        .icon-btn { width: 65px; height: 65px; border-radius: 50%; border: none; background: white; cursor: pointer; font-size: 1.8rem; box-shadow: 0 5px 10px var(--shadow); }
+
+        .flash-correct { background-color: #55efc4 !important; transition: 0.2s; }
+        .flash-wrong { background-color: #ff7675 !important; transition: 0.2s; }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen">
+        <button class="btn" onclick="startGame()">START</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="hud">
+            <div class="stat-box"><span id="score">0</span></div>
+            <div id="timer-box"><span id="timer">3:00</span></div>
+        </div>
+
+        <div class="chef-container">
+            <img src="chef.png" class="chef-img" alt="Chef">
+        </div>
+
+        <div class="game-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 60px;">
+            <div class="customer-wrapper">
+                <div class="speech-bubble" id="speech-bubble">...</div>
+                <img src="c1.png" class="customer-img" id="customer-img">
+            </div>
+            <div class="choice-area" id="choices"></div>
+        </div>
+
+        <div class="controls">
+            <button class="icon-btn" onclick="toggleAudio()">🔊</button>
+            <button class="icon-btn" onclick="goHome()">🏠</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2 style="font-size: 4rem; color: white; text-shadow: 4px 4px var(--primary);">GREAT JOB!</h2>
+        <div class="stat-box" style="font-size: 4rem; margin: 30px;"><span id="final-score">0</span></div>
+        <button class="btn" onclick="goHome()">PLAY AGAIN</button>
+    </div>
+
+    <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        const MEALS = ['breakfast', 'lunch', 'dinner'];
+        const FOODS = ['bread', 'chicken', 'salad', 'soup', 'noodles'];
+        const CUSTOMERS = ['c1.png', 'c2.png', 'c3.png', 'c4.png', 'c5.png'];
+        
+        let score = 0;
+        let timeLeft = 180; 
+        let currentStep = 1;
+        let currentTarget = [];
+        let playerSelections = [];
+        let timerInterval;
+        let audioEnabled = true;
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(id + '-screen').style.display = 'flex';
+        }
+
+        function startGame() {
+            score = 0; timeLeft = 180; updateHUD();
+            showScreen('game'); startTimer(); nextRound();
+            if(audioEnabled) document.getElementById('bg-music').play().catch(()=>{});
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--; updateHUD();
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function updateHUD() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('score').innerText = score;
+        }
+
+        async function nextRound() {
+            const customer = document.getElementById('customer-img');
+            const bubble = document.getElementById('speech-bubble');
+            customer.classList.add('exit-left');
+            bubble.classList.remove('visible');
+            await new Promise(r => setTimeout(r, 850));
+            customer.src = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
+            customer.className = 'customer-img'; 
+            setTimeout(() => {
+                customer.classList.add('at-center');
+                setupMealStep();
+            }, 100);
+        }
+
+        function setupMealStep() {
+            currentStep = 1;
+            const target = MEALS[Math.floor(Math.random() * MEALS.length)];
+            currentTarget = [target];
+            const text = target === 'breakfast' ? "Breakfast, please!" : (target === 'lunch' ? "Lunch time!" : "Dinner, please!");
+            setTimeout(() => {
+                showBubble(text);
+                renderChoices([...MEALS].sort(() => Math.random() - 0.5));
+            }, 600);
+        }
+
+        function setupFoodStep() {
+            currentStep = 2;
+            playerSelections = [];
+            const count = Math.random() > 0.5 ? 2 : 1;
+            const shuffledTarget = [...FOODS].sort(() => 0.5 - Math.random());
+            currentTarget = shuffledTarget.slice(0, count);
+            let text = "I want " + currentTarget[0];
+            if(count === 2) text += " and " + currentTarget[1];
+            showBubble(text);
+            renderChoices([...FOODS].sort(() => Math.random() - 0.5));
+        }
+
+        function renderChoices(items) {
+            const container = document.getElementById('choices');
+            container.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${item}.png" onerror="this.src='https://via.placeholder.com/120?text=${item}'">`;
+                card.onclick = () => handleChoice(item, card);
+                container.appendChild(card);
+            });
+        }
+
+        function handleChoice(item, card) {
+            if (currentStep === 1) {
+                if (item === currentTarget[0]) {
+                    score += 10; flash('correct'); setupFoodStep();
+                } else {
+                    score = Math.max(0, score - 5); flash('wrong'); speak("Try again!");
+                }
+            } else {
+                if (currentTarget.includes(item)) {
+                    if (!playerSelections.includes(item)) {
+                        playerSelections.push(item);
+                        card.classList.add('selected');
+                        speak(item);
+                    }
+                    if (playerSelections.length === currentTarget.length) {
+                        score += 10; flash('correct'); showBubble("Yummy!");
+                        speak("Yummy!"); setTimeout(nextRound, 1500);
+                    }
+                } else {
+                    score = Math.max(0, score - 5); flash('wrong');
+                    playerSelections = [];
+                    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+                }
+            }
+            updateHUD();
+        }
+
+        function showBubble(text) {
+            const b = document.getElementById('speech-bubble');
+            b.innerText = text;
+            b.classList.add('visible');
+            speak(text);
+        }
+
+        function speak(text) {
+            if (!audioEnabled) return;
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 0.5;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function flash(type) {
+            const b = document.body;
+            const c = type === 'correct' ? 'flash-correct' : 'flash-wrong';
+            b.classList.add(c);
+            setTimeout(() => b.classList.remove(c), 300);
+        }
+
+        function toggleAudio() { audioEnabled = !audioEnabled; }
+        function goHome() { clearInterval(timerInterval); showScreen('home'); }
+        function endGame() { document.getElementById('final-score').innerText = score; showScreen('result'); }
+    </script>
+</body>
+</html>
