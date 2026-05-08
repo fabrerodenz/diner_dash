@@ -71,7 +71,7 @@
 
         .btn:active { transform: translateY(5px); box-shadow: 0 5px 0 #e1c01e; }
 
-        /* HUD */
+        /* HUD & TIMER */
         .hud {
             position: absolute;
             top: 20px;
@@ -102,7 +102,7 @@
             transform: rotate(-2deg);
         }
 
-        /* CHEF: 500px height, bottom: 0, right: -30 */
+        /* CHEF MODIFICATION */
         .chef-container {
             position: absolute;
             bottom: 0px;
@@ -117,7 +117,7 @@
             display: block;
         }
 
-        /* CUSTOMER AREA */
+        /* CUSTOMER ALIGNMENT */
         .customer-wrapper {
             position: relative;
             height: 380px; 
@@ -139,7 +139,7 @@
         .customer-img.at-center { transform: translateX(0); }
         .customer-img.exit-left { transform: translateX(-120vw); }
 
-        /* BUBBLE MODIFICATION: top: -150px */
+        /* BUBBLE POSITION -150px */
         .speech-bubble {
             background: white;
             padding: 20px 45px;
@@ -159,7 +159,7 @@
 
         .speech-bubble.visible { opacity: 1; }
 
-        /* OPTIONS AREA */
+        /* OPTION ICONS - Horizontal Line */
         .choice-area {
             display: flex;
             flex-direction: row;
@@ -295,7 +295,7 @@
             const text = target === 'breakfast' ? "Breakfast, please!" : (target === 'lunch' ? "Lunch time!" : "Dinner, please!");
             setTimeout(() => {
                 showBubble(text);
-                renderChoices([...MEALS].sort(() => Math.random() - 0.5));
+                renderChoices();
             }, 600);
         }
 
@@ -303,20 +303,39 @@
             currentStep = 2;
             playerSelections = [];
             const count = Math.random() > 0.5 ? 2 : 1;
-            const shuffledTarget = [...FOODS].sort(() => 0.5 - Math.random());
-            currentTarget = shuffledTarget.slice(0, count);
+            // Shuffle a copy of the food list and pick random items
+            const shuffledPool = [...FOODS].sort(() => 0.5 - Math.random());
+            currentTarget = shuffledPool.slice(0, count);
+
             let text = "I want " + currentTarget[0];
             if(count === 2) text += " and " + currentTarget[1];
+            
             showBubble(text);
-            renderChoices([...FOODS].sort(() => Math.random() - 0.5));
+            renderChoices();
         }
 
-        function renderChoices(items) {
+        function renderChoices() {
             const container = document.getElementById('choices');
             container.innerHTML = '';
-            items.forEach(item => {
+            
+            // LOGIC FIX: Guarantee currentTarget items are in the final array
+            let finalOptions = [...currentTarget];
+            const fullPool = currentStep === 1 ? MEALS : FOODS;
+            
+            // Fill remaining slots from the main list until we have all available options
+            fullPool.forEach(item => {
+                if (!finalOptions.includes(item)) {
+                    finalOptions.push(item);
+                }
+            });
+
+            // Shuffle the combined list so the answer isn't always first
+            finalOptions.sort(() => Math.random() - 0.5);
+
+            finalOptions.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                // Note: Ensure filenames on GitHub are lowercase (e.g., chicken.png)
                 card.innerHTML = `<img src="${item}.png" onerror="this.src='https://via.placeholder.com/120?text=${item}'">`;
                 card.onclick = () => handleChoice(item, card);
                 container.appendChild(card);
@@ -325,7 +344,7 @@
 
         function handleChoice(item, card) {
             if (currentStep === 1) {
-                if (item === currentTarget[0]) {
+                if (currentTarget.includes(item)) {
                     score += 10; flash('correct'); setupFoodStep();
                 } else {
                     score = Math.max(0, score - 5); flash('wrong'); speak("Try again!");
