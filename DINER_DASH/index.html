@@ -59,7 +59,7 @@
         .btn {
             background: var(--accent);
             border: none;
-            padding: 25px 60px;
+            padding: 2vh 5vw;
             border-radius: 50px;
             font-size: 2.5rem;
             font-weight: 600;
@@ -69,9 +69,7 @@
             transition: transform 0.1s;
         }
 
-        .btn:active { transform: translateY(5px); box-shadow: 0 5px 0 #e1c01e; }
-
-        /* HUD & TIMER */
+        /* HUD */
         .hud {
             position: absolute;
             top: 20px;
@@ -86,7 +84,7 @@
             background: white;
             padding: 10px 30px;
             border-radius: 35px;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 600;
             box-shadow: 0 5px 15px var(--shadow);
         }
@@ -94,42 +92,44 @@
         #timer-box {
             background: var(--primary);
             color: white;
-            font-size: 2.8rem;
-            padding: 15px 45px;
-            border: 6px solid white;
+            font-size: 2.2rem;
+            padding: 10px 30px;
+            border: 5px solid white;
             border-radius: 60px;
             box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
             transform: rotate(-2deg);
         }
 
-        /* CHEF MODIFICATION */
+        /* CHEF: Uses vh (view height) so it shrinks on smaller screens */
         .chef-container {
             position: absolute;
             bottom: 0px;
-            right: -30px;
+            right: -20px;
             z-index: 60;
             pointer-events: none;
         }
 
         .chef-img {
-            height: 500px; 
+            height: 65vh; /* Scales with screen height */
+            max-height: 500px;
             filter: drop-shadow(-15px 5px 20px rgba(0,0,0,0.2));
             display: block;
         }
 
-        /* CUSTOMER ALIGNMENT */
+        /* CUSTOMER AREA */
         .customer-wrapper {
             position: relative;
-            height: 380px; 
+            height: 40vh; 
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: flex-end; 
-            margin-bottom: 20px; 
+            margin-bottom: 2vh;
         }
 
         .customer-img {
-            height: 350px; 
+            height: 35vh; 
+            max-height: 350px;
             position: absolute;
             transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateX(120vw);
@@ -139,59 +139,77 @@
         .customer-img.at-center { transform: translateX(0); }
         .customer-img.exit-left { transform: translateX(-120vw); }
 
-        /* BUBBLE POSITION -150px */
         .speech-bubble {
             background: white;
-            padding: 20px 45px;
-            border-radius: 60px;
-            font-size: 2.6rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 2rem;
             font-weight: 600;
             position: absolute;
-            top: -150px; 
+            top: -120px; 
             box-shadow: 0 15px 35px var(--shadow);
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 50;
             text-align: center;
-            border: 6px solid var(--secondary);
-            min-width: 300px;
+            border: 5px solid var(--secondary);
+            min-width: 250px;
         }
 
         .speech-bubble.visible { opacity: 1; }
 
-        /* OPTION ICONS - Horizontal Line */
+        /* CHOICE AREA: Responsive Grid/Flex */
         .choice-area {
             display: flex;
             flex-direction: row;
-            flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 1.5vw;
             width: 100%;
-            padding-right: 15%; 
+            padding-right: 15vw; /* Make room for the chef */
             z-index: 45;
         }
 
         .card {
             background: white;
-            width: 160px; 
-            height: 160px;
-            border-radius: 40px;
+            width: 15vw; 
+            height: 15vw;
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 20%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 12px 0 #ddd;
+            box-shadow: 0 8px 0 #ddd;
             cursor: pointer;
             transition: transform 0.1s;
-            flex-shrink: 0;
+            flex-shrink: 1;
         }
 
-        .card:active { transform: scale(0.9); }
-        .card img { width: 120px; height: 120px; object-fit: contain; }
-        .card.selected { background: var(--secondary); box-shadow: 0 12px 0 #39a69e; }
+        .card img { width: 80%; height: 80%; object-fit: contain; }
+        .card.selected { background: var(--secondary); box-shadow: 0 8px 0 #39a69e; }
+
+        /* RESPONSIVE IPAD FIX */
+        @media (max-width: 1024px) {
+            .choice-area {
+                padding-right: 10vw; /* Less padding on iPad */
+                gap: 10px;
+            }
+            .card {
+                width: 13vw;
+                height: 13vw;
+            }
+            .chef-img {
+                height: 45vh; /* Make chef smaller on iPad so icons fit */
+            }
+            .speech-bubble {
+                top: -100px;
+                font-size: 1.5rem;
+            }
+        }
 
         .controls { position: absolute; bottom: 20px; left: 20px; display: flex; gap: 15px; }
-        .icon-btn { width: 65px; height: 65px; border-radius: 50%; border: none; background: white; cursor: pointer; font-size: 1.8rem; box-shadow: 0 5px 10px var(--shadow); }
+        .icon-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: white; cursor: pointer; font-size: 1.5rem; box-shadow: 0 5px 10px var(--shadow); }
 
         .flash-correct { background-color: #55efc4 !important; transition: 0.2s; }
         .flash-wrong { background-color: #ff7675 !important; transition: 0.2s; }
@@ -213,7 +231,7 @@
             <img src="chef.png" class="chef-img" alt="Chef">
         </div>
 
-        <div class="game-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 60px;">
+        <div class="game-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5vh;">
             <div class="customer-wrapper">
                 <div class="speech-bubble" id="speech-bubble">...</div>
                 <img src="c1.png" class="customer-img" id="customer-img">
@@ -228,8 +246,8 @@
     </div>
 
     <div id="result-screen" class="screen">
-        <h2 style="font-size: 4rem; color: white; text-shadow: 4px 4px var(--primary);">GREAT JOB!</h2>
-        <div class="stat-box" style="font-size: 4rem; margin: 30px;"><span id="final-score">0</span></div>
+        <h2 style="font-size: 3rem; color: white; text-shadow: 4px 4px var(--primary);">GREAT JOB!</h2>
+        <div class="stat-box" style="font-size: 3rem; margin: 20px;"><span id="final-score">0</span></div>
         <button class="btn" onclick="goHome()">PLAY AGAIN</button>
     </div>
 
@@ -292,7 +310,7 @@
             currentStep = 1;
             const target = MEALS[Math.floor(Math.random() * MEALS.length)];
             currentTarget = [target];
-            const text = target === 'breakfast' ? "Breakfast, please!" : (target === 'lunch' ? "Lunch time!" : "Dinner, please!");
+            const text = target === 'breakfast' ? "Breakfast!" : (target === 'lunch' ? "Lunch!" : "Dinner!");
             setTimeout(() => {
                 showBubble(text);
                 renderChoices();
@@ -303,7 +321,6 @@
             currentStep = 2;
             playerSelections = [];
             const count = Math.random() > 0.5 ? 2 : 1;
-            // Shuffle a copy of the food list and pick random items
             const shuffledPool = [...FOODS].sort(() => 0.5 - Math.random());
             currentTarget = shuffledPool.slice(0, count);
 
@@ -317,26 +334,17 @@
         function renderChoices() {
             const container = document.getElementById('choices');
             container.innerHTML = '';
-            
-            // LOGIC FIX: Guarantee currentTarget items are in the final array
             let finalOptions = [...currentTarget];
             const fullPool = currentStep === 1 ? MEALS : FOODS;
-            
-            // Fill remaining slots from the main list until we have all available options
             fullPool.forEach(item => {
-                if (!finalOptions.includes(item)) {
-                    finalOptions.push(item);
-                }
+                if (!finalOptions.includes(item)) finalOptions.push(item);
             });
-
-            // Shuffle the combined list so the answer isn't always first
             finalOptions.sort(() => Math.random() - 0.5);
 
             finalOptions.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                // Note: Ensure filenames on GitHub are lowercase (e.g., chicken.png)
-                card.innerHTML = `<img src="${item}.png" onerror="this.src='https://via.placeholder.com/120?text=${item}'">`;
+                card.innerHTML = `<img src="${item}.png" onerror="this.src='https://via.placeholder.com/100?text=${item}'">`;
                 card.onclick = () => handleChoice(item, card);
                 container.appendChild(card);
             });
@@ -380,7 +388,7 @@
             if (!audioEnabled) return;
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.rate = 0.5;
+            msg.rate = 0.6;
             window.speechSynthesis.speak(msg);
         }
 
